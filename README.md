@@ -2,6 +2,35 @@
 
 A key-value store for the command-line, with optional encryption.
 
+## Dependencies
+
+Requires sqlite3. Development libraries for sqlite3 may also be required to
+build from source. See necessary OS-specific packages below:
+
+Debian/Ubuntu: `apt install sqlite3 libsqlite3-dev`
+
+Fedora: `dnf install sqlite sqlite-devel`
+
+OpenBSD: `pkg_add sqlite3`
+
+## Building
+
+`cargo build --release`
+
+Only compatible with Linux/Unix.
+
+## Example Usage
+
+`depot stow newinfo` (Waits for data entry on stdin)
+
+`echo shhh | depot stow -s secret` (Will prompt for password)
+
+`depot fetch newinfo` (Prints to stdout)
+
+`depot fetch -n fetch secret | xclip` (Prints without trailing newline. Will
+prompt for password.)
+
+
 ```
 Usage: depot [-nsh?] <action> <key>
 

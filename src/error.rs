@@ -13,13 +13,13 @@ impl std::fmt::Debug for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::AnyErr(s) => write!(f, "{}", s),
-            Error::B64Err(e) => write!(f, "{}", e),
+            Error::B64Err(e) => e.fmt(f),
             Error::BadPassword => write!(f, "bad password"),
-            Error::IoErr(e) => write!(f, "{}", e),
+            Error::IoErr(e) => e.fmt(f),
             Error::NeedPassword => write!(f, "password required but not supplied"),
             Error::NotFound => write!(f, "key not found"),
-            Error::SqlErr(e) => write!(f, "{}", e),
-            Error::Utf8Err(e) => write!(f, "{}", e),
+            Error::SqlErr(e) => e.fmt(f),
+            Error::Utf8Err(e) => e.fmt(f),
         }
     }
 }

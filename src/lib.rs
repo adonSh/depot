@@ -1,3 +1,7 @@
+//! Depot is a key-value store with optional encryption.
+//! Use it as a repository for reminders, trivia, or even
+//! sensitive information such as passwords.
+
 use aes_gcm::{aead::Aead, AeadCore, Aes256Gcm, KeyInit};
 use base64::prelude::BASE64_STANDARD as b64;
 use base64::Engine;
@@ -16,6 +20,8 @@ pub struct Depot {
 }
 
 impl Depot {
+    /// Returns a new storage medium (sqlite3 database)
+    /// or an error if initialization is unsuccessful.
     pub fn new(path: &str) -> Result<Depot> {
         let conn = rusqlite::Connection::open(path)?;
         match conn.query_row("select data from salt", (), |row| row.get(0)) {
@@ -31,6 +37,9 @@ impl Depot {
         }
     }
 
+    /// Stores the specified key and value in the depot. If the key exists
+    /// then the value is updated. If a password is given it will be used to
+    /// encrypt the value. Returns an error if encryption or storage fails.
     pub fn stow(&self, key: &str, val: &str, password: Option<&str>) -> Result<()> {
         let (data, nonce) = match password {
             None => (String::from(val), None),
@@ -54,6 +63,9 @@ impl Depot {
         Ok(())
     }
 
+    /// Returns the value from the depot associated with the specified key
+    /// or an error if unsuccessful. A password must be supplied for
+    /// encrypted values.
     pub fn fetch(&self, key: &str, password: Option<&str>) -> Result<String> {
         let (val, nonce): (String, Option<Vec<u8>>) = self.db.query_row(
             "select val, nonce
@@ -76,12 +88,16 @@ impl Depot {
         }
     }
 
+    /// Deletes the specified key from the depot.
+    /// Returns an error is unsuccessful.
     pub fn drop(&self, key: &str) -> Result<()> {
         self.db
             .execute("delete from storage where key = ?1", (key,))?;
         Ok(())
     }
 
+    /// Writes the schema to the database.
+    /// Returns an error if unsuccessful.
     fn init(&mut self) -> rusqlite::Result<usize> {
         self.db.execute_batch(
             "create table if not exists storage (
@@ -102,6 +118,9 @@ impl Depot {
     }
 }
 
+/// Returns the given data encrypted with a key derived from the given
+/// password and the nonce with which it was encrypted
+/// or an error if unsuccessful.
 fn encrypt(
     password: &[u8],
     salt: &[u8],
@@ -117,6 +136,8 @@ fn encrypt(
     Ok((ciphertext, Vec::from(nonce.as_slice())))
 }
 
+/// Returns the given data decrypted with the key derived from the given
+/// password or an error if unsuccessful.
 fn decrypt(
     password: &[u8],
     salt: &[u8],

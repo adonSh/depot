@@ -44,6 +44,8 @@ fn main() -> Result<()> {
     }
 }
 
+/// Returns the password from either an environment variable or console input
+/// or an error if unsuccessful.
 fn get_password() -> Result<String> {
     match env::var(ENV_PASS) {
         Ok(p) => Ok(p),
@@ -63,6 +65,7 @@ fn get_password() -> Result<String> {
     }
 }
 
+/// Returns the value read from stdin or an error if unsuccessful
 fn get_val(secret: bool) -> Result<String> {
     let val = if secret && termion::is_tty(&io::stdin()) {
         match io::stdin().read_passwd(&mut io::stdout())? {
@@ -81,6 +84,8 @@ fn get_val(secret: bool) -> Result<String> {
     }
 }
 
+/// Returns the key, options, and action to perform specified in
+/// the command-line arguments or an error if parsing is unsuccessful.
 fn parse_args(args: &[String]) -> Result<(&str, &str, bool, bool)> {
     let mut action = "";
     let mut key = "";
@@ -116,6 +121,8 @@ fn parse_args(args: &[String]) -> Result<(&str, &str, bool, bool)> {
     }
 }
 
+/// Returns the location of the database in the filesystem
+/// depending on the environment or an error if a path cannot be determined.
 fn choose_path() -> Result<String> {
     match env::var(ENV_PATH) {
         Ok(p) => Ok(p),
@@ -137,6 +144,7 @@ fn choose_path() -> Result<String> {
     }
 }
 
+/// Returns the help message
 fn usage() -> String {
     [
         "Usage: depot [-nsh?] <action> <key>",
